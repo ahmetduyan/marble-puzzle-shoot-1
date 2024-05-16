@@ -104,12 +104,12 @@
       <SDLCheck>false</SDLCheck>
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>C:\raysan\raylib-5.0_win64_msvc16\raylib-5.0_win64_msvc16\include</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\Libraries\raylib-5.0_win64_msvc16\include</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalLibraryDirectories>C:\raysan\raylib-5.0_win64_msvc16\raylib-5.0_win64_msvc16\lib</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>C:\Libraries\raylib-5.0_win64_msvc16\lib</AdditionalLibraryDirectories>
       <AdditionalDependencies>raylib.lib;winmm.lib;$(CoreLibraryDependencies);%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>

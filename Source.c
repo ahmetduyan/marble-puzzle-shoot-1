@@ -50,7 +50,9 @@ int totalActive = MAX_BALL;
 int score = 0;
 FILE* fptr = NULL;
 
+
 void initGame();
+void initGame2();
 void updateGame();
 void targetCreator(node**, target*);
 void drawTargets(node*);
@@ -71,10 +73,38 @@ void stepBack(node*, node*);
 void isBoom();
 int highScore(int);
 
+
+Texture2D kurbaga;
+Texture2D ending;
+Texture2D background;
+Texture2D redball;
+Texture2D blueball;
+Texture2D greenball;
+Texture2D yellowball;
+Texture2D purpleball;
+Texture2D blackball;
+Texture2D gameover;
+Music music;
+Sound effect;
+
 int main(void) {
 	InitWindow(screenWidth, screenHeight, "marble puzzle shoot");
 	SetTargetFPS(120);
 	initGame();
+	InitAudioDevice();
+
+	kurbaga = LoadTexture("images/kurbaga.png");
+	background = LoadTexture("images/background.png");
+	redball = LoadTexture("images/redballl.png");
+	blueball = LoadTexture("images/blueballl.png");
+	greenball = LoadTexture("images/greenballl.png");
+	yellowball = LoadTexture("images/yellowball.png");
+	purpleball = LoadTexture("images/purpleball.png");
+	blackball = LoadTexture("images/blackball.png");
+	ending = LoadTexture("images/ending.png");
+	gameover = LoadTexture("images/gameover.png");
+	music = LoadMusicStream("sounds/sound.wav");
+	effect = LoadSound("sounds/effect.wav");
 
 	Texture2D textureMap = LoadTexture("images/yenimapp4.png");
 
@@ -83,6 +113,10 @@ int main(void) {
 
 		updateGame();
 		updateTarget(&head);
+
+		PlayMusicStream(music);
+		UpdateMusicStream(music);
+
 		if (IsMouseButtonDown(MOUSE_LEFT_BUTTON)) bulletFire();
 
 		if (checkCollision(head, &mermi)) {
@@ -94,23 +128,45 @@ int main(void) {
 		BeginDrawing();
 		switch (updateScreen()) {
 		case GAMEPLAY:
+			DrawTexture(background, 0, 0, WHITE);
 			drawTargets(head);
-			DrawCircle(screenWidth / 2, screenHeight / 2, 40.0, DARKGREEN);
-			DrawCircle(550, screenHeight / 2, 30, DARKGREEN);
+			DrawTexture(kurbaga, screenWidth / 2 - 56, screenHeight / 2 - 65, WHITE);
+			DrawTexture(ending, 570 - 56, screenHeight / 2 - 30, WHITE);
 			DrawRectangleRec(health, RED);
 			DrawText("HEALTH", 45, 20, 18, LIGHTGRAY);
 			DrawText(TextFormat("SCORE: %d", score), 1350, 22, 20, RED);
-			if (mermi.active == true) DrawCircle(mermi.ballPos.x, mermi.ballPos.y, 20, mermi.color);
+			if (mermi.active == true) {
+				if (isSameColor(mermi.color, RED)) {
+					DrawTexture(redball, mermi.ballPos.x, mermi.ballPos.y, WHITE);
+				}
+				if (isSameColor(mermi.color, BLUE)) {
+					DrawTexture(blueball, mermi.ballPos.x, mermi.ballPos.y, WHITE);
+				}
+				if (isSameColor(mermi.color, GREEN)) {
+					DrawTexture(greenball, mermi.ballPos.x, mermi.ballPos.y, WHITE);
+				}
+				if (isSameColor(mermi.color, YELLOW)) {
+					DrawTexture(redball, mermi.ballPos.x, mermi.ballPos.y, WHITE);
+				}
+				if (isSameColor(mermi.color, PURPLE)) {
+					DrawTexture(blueball, mermi.ballPos.x, mermi.ballPos.y, WHITE);
+				}
+				if (isSameColor(mermi.color, BLACK)) {
+					DrawTexture(greenball, mermi.ballPos.x, mermi.ballPos.y, WHITE);
+				}
+			}
 			break;
 		case GAMEOVER:
-			DrawCircle(screenWidth / 2, screenHeight / 2, 20000, BLACK);
-			DrawText(TextFormat("SCORE: %d", score), 1350, 62, 20, RED);
-			DrawText(TextFormat("HIGH SCORE: %d", highScore(score)), 1350, 22, 20, RED);
+			DrawTexture(gameover, 0, 0, WHITE);
+			DrawText(TextFormat("SCORE: %d", score), screenWidth/2-120, 600, 50, RED);
+			DrawText(TextFormat("HIGH SCORE: %d", highScore(score)), screenWidth/2-120, 700, 50, RED);
 		}
 		EndDrawing();
 
 	}
 	freeTargets(head);
+	UnloadMusicStream(music);
+	CloseAudioDevice();
 	UnloadTexture(textureMap);
 	CloseWindow();
 	return 0;
@@ -155,6 +211,47 @@ void initGame() {
 	mermi.isFired = false;
 	mermi.active = true;
 }
+
+void initGame2() {
+	int sonuncuNum = maxball;
+
+	for (int num = 1; num <= maxball; num++) {
+		if (num <= 3) {
+			hedef[num].x = 80;
+			hedef[num].y = 80 - num * 40;
+			hedef[num].radius = 20;
+			hedef[num].color = (Color){ 255, 255, 255, 0 };
+			hedef[num].active = false;
+			hedef[num].moving = true;
+		}
+		else if (sonuncuNum - 3 <= num) {
+			hedef[num].x = 80;
+			hedef[num].y = 80 - num * 40;
+			hedef[num].radius = 20;
+			hedef[num].color = (Color){ 255, 255, 255, 0 };
+			hedef[num].active = false;
+			hedef[num].moving = true;
+		}
+		else {
+			hedef[num].x = 80;
+			hedef[num].y = 80 - num * 40;
+			hedef[num].radius = 20;
+			hedef[num].color = giveColor();
+			hedef[num].active = true;
+			hedef[num].moving = true;
+		}
+
+		targetCreator(&head, &hedef[num]);
+	}
+
+	mermi.ballPos = (Vector2){ screenWidth / 2, screenHeight / 2 };
+	mermi.ballSpeed = (Vector2){ 0 , 0 };
+	mermi.radius = 20.0;
+	mermi.color = giveColorBullet(head);
+	mermi.isFired = false;
+	mermi.active = true;
+}
+
 
 void targetCreator(node** head, target* hedef) {
 	node* new_node = (node*)malloc(sizeof(node));
@@ -201,7 +298,7 @@ void updateGame() {
 
 	if (totalActive == 0) {
 		maxball += 5;
-		initGame();
+		initGame2();
 		SetTargetFPS(120);
 	}
 	else activeCounter = 0;
@@ -420,7 +517,7 @@ void isBoom() {
 			current = current->next;
 		}
 		holdBallNext = current->next;
-
+		PlaySound(effect);
 		current = eklenen;
 		while (current->data->active == false && isSameColor(current->previous->data->color, current->data->color)) { //eklenenin önündekileri de yok et
 			hold = (Vector2){ current->previous->data->x, current->previous->data->y };
@@ -596,7 +693,24 @@ void drawTargets(node* head) {
 	node* current = head;
 	while (current->next != NULL) {
 		if (current->data->active == true) {
-			DrawCircle(current->data->x, current->data->y, current->data->radius, current->data->color);
+			if (isSameColor(current->data->color, RED)) {
+				DrawTexture(redball, current->data->x, current->data->y, WHITE);
+			}
+			if (isSameColor(current->data->color, BLUE)) {
+				DrawTexture(blueball, current->data->x, current->data->y, WHITE);
+			}
+			if (isSameColor(current->data->color, GREEN)) {
+				DrawTexture(greenball, current->data->x, current->data->y, WHITE);
+			}
+			if (isSameColor(current->data->color, YELLOW)) {
+				DrawTexture(yellowball, current->data->x, current->data->y, WHITE);
+			}
+			if (isSameColor(current->data->color, PURPLE)) {
+				DrawTexture(purpleball, current->data->x, current->data->y, WHITE);
+			}
+			if (isSameColor(current->data->color, BLACK)) {
+				DrawTexture(blackball, current->data->x, current->data->y, WHITE);
+			}
 		}
 		current = current->next;
 	}
